@@ -1,0 +1,256 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Modern Dark Theme - Always dark */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 187 92% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
+
+    /* Custom properties for enhanced effects */
+    --gradient-1: linear-gradient(135deg, hsl(217 91% 60% / 0.1) 0%, transparent 100%);
+    --gradient-2: radial-gradient(circle at top right, hsl(187 92% 50% / 0.05) 0%, transparent 50%);
+    --shadow-elevation-low: 0 2px 8px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-elevation-medium: 0 8px 24px -4px rgb(0 0 0 / 0.3), 0 2px 8px -2px rgb(0 0 0 / 0.3);
+    --shadow-elevation-high: 0 24px 48px -12px rgb(0 0 0 / 0.4), 0 8px 16px -4px rgb(0 0 0 / 0.3);
+    --shadow-glow: 0 0 32px hsl(217 91% 60% / 0.2);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply antialiased scroll-smooth;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(ellipse 80% 80% at 50% -20%, hsl(217 91% 60% / 0.1), transparent),
+      radial-gradient(ellipse 80% 80% at 80% 80%, hsl(187 92% 50% / 0.08), transparent),
+      radial-gradient(ellipse 80% 80% at 20% 80%, hsl(217 91% 60% / 0.08), transparent),
+      linear-gradient(180deg, hsl(0 0% 3%), hsl(0 0% 5%));
+    background-attachment: fixed;
+    min-height: 100vh;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Particle background specific styles */
+  .particle-background-container {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+  
+  /* Ensure content is visible over particle background */
+  .home-page-wrapper {
+    position: relative;
+    z-index: 1;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        hsl(0 0% 100% / 0.01) 0px,
+        transparent 1px,
+        transparent 2px,
+        hsl(0 0% 100% / 0.01) 3px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        hsl(0 0% 100% / 0.01) 0px,
+        transparent 1px,
+        transparent 2px,
+        hsl(0 0% 100% / 0.01) 3px
+      );
+    background-size: 50px 50px;
+    pointer-events: none;
+    opacity: 0.3;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-md transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+}
+
+@layer components {
+  /* Glass morphism base */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    background-image: linear-gradient(135deg, hsl(217 91% 60% / 0.1) 0%, transparent 100%);
+  }
+
+  /* Enhanced animations */
+  .animate-in {
+    animation: animate-in 0.5s ease-out;
+  }
+
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Glow effect */
+  .glow {
+    @apply transition-all duration-300;
+  }
+
+  .glow:hover {
+    filter: drop-shadow(0 0 20px hsl(217 91% 60% / 0.3));
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
+    background-size: 200% auto;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    to {
+      background-position: 200% center;
+    }
+  }
+
+  /* Modern card styles */
+  .card-gradient {
+    @apply relative overflow-hidden;
+    background: linear-gradient(135deg, hsl(0 0% 6%) 0%, hsl(0 0% 9%) 100%);
+  }
+
+  .card-gradient::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: radial-gradient(
+      600px circle at var(--mouse-x) var(--mouse-y),
+      hsl(217 91% 60% / 0.1),
+      transparent 40%
+    );
+  }
+
+  .card-gradient:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(0 0% 100% / 0.05),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Mobile-specific optimizations */
+  .mobile-optimized {
+    @apply text-sm leading-relaxed;
+  }
+
+  /* Mobile table improvements */
+  .mobile-table-container {
+    @apply overflow-x-auto -mx-4 px-4;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .mobile-table-container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .mobile-table-container::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .mobile-table-container::-webkit-scrollbar-thumb {
+    @apply bg-muted/50 rounded-full;
+  }
+
+  /* Mobile hero section */
+  .mobile-hero {
+    @apply space-y-3;
+  }
+
+  /* Mobile spacing utilities */
+  .mobile-compact {
+    @apply space-y-2;
+  }
+
+  .mobile-section {
+    @apply py-4 space-y-4;
+  }
+
+  /* Mobile button optimizations */
+  .mobile-button {
+    @apply min-h-[44px] px-4 text-sm;
+    touch-action: manipulation;
+  }
+
+  /* Mobile card optimizations */
+  .mobile-card {
+    @apply rounded-lg p-3 space-y-3;
+  }
+}
