@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:8000'
 
@@ -45,47 +44,8 @@ async function handleRequest(
   method: string
 ) {
   try {
-    // Get the session
+    // Get the session (but don't require it - let backend handle auth)
     const session = await auth()
-    
-    // Decode token to check expiration
-    let tokenExp = null
-    if (session?.accessToken) {
-      try {
-        const tokenParts = session.accessToken.split('.')
-        const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString())
-        tokenExp = payload.exp ? new Date(payload.exp * 1000).toISOString() : null
-      } catch (e) {
-        console.error('Failed to decode token:', e)
-      }
-    }
-
-    console.log('Proxy session check:', {
-      hasSession: !!session,
-      hasAccessToken: !!session?.accessToken,
-      sessionError: session?.error,
-      path: request.url,
-      method,
-      sessionKeys: session ? Object.keys(session) : [],
-      tokenLength: session?.accessToken ? session.accessToken.length : 0,
-      tokenExpiration: tokenExp,
-      currentTime: new Date().toISOString()
-    })
-    
-    if (!session?.accessToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No access token in session' },
-        { status: 401 }
-      )
-    }
-
-    // Check if session has error
-    if (session.error) {
-      return NextResponse.json(
-        { error: 'Session error', details: session.error },
-        { status: 401 }
-      )
-    }
 
     // Await params before using
     const resolvedParams = await params
@@ -96,8 +56,12 @@ async function handleRequest(
 
     // Prepare headers
     const headers = new Headers()
-    headers.set('Authorization', `Bearer ${session.accessToken}`)
     headers.set('Content-Type', 'application/json')
+    
+    // Include authorization header if session exists
+    if (session?.accessToken) {
+      headers.set('Authorization', `Bearer ${session.accessToken}`)
+    }
     
     // Forward some headers from the original request if needed
     const acceptHeader = request.headers.get('accept')
@@ -120,7 +84,7 @@ async function handleRequest(
       url: backendUrl,
       method,
       hasBody: !!body,
-      authHeader: headers.get('Authorization')?.substring(0, 20) + '...'
+      hasAuth: !!headers.get('Authorization')
     })
 
     // Make the request to the backend
@@ -154,27 +118,6 @@ async function handleRequest(
     // Log backend error details for debugging
     if (response.status === 401) {
       console.log('Backend 401 error details:', data)
-      
-      // Also log token details for debugging
-      if (session?.accessToken) {
-        try {
-          const tokenParts = session.accessToken.split('.')
-          const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString())
-          const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString())
-          console.log('Token details:', {
-            header,
-            issuer: payload.iss,
-            audience: payload.aud,
-            subject: payload.sub,
-            issuedAt: new Date(payload.iat * 1000).toISOString(),
-            expiration: new Date(payload.exp * 1000).toISOString(),
-            azp: payload.azp,
-            realm_access: payload.realm_access
-          })
-        } catch (e) {
-          console.error('Failed to decode token for debugging:', e)
-        }
-      }
     }
 
     // Return the response
